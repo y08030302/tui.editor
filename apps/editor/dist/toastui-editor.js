@@ -6013,7 +6013,15 @@ var CodeBlock = /** @class */ (function (_super) {
         enumerable: false,
         configurable: true
     });
-    CodeBlock.prototype.commands = function () {
+    CodeBlock.prototype.commands = function (cmdType) {
+        if (cmdType === 'Tab') {
+            return function (state, dispatch) {
+                var _a = state.selection, $from = _a.$from, $to = _a.$to;
+                var tr = state.tr.insertText('\t', $from.pos, $to.pos);
+                dispatch(tr);
+                return true;
+            };
+        }
         return function () { return function (state, dispatch) {
             var selection = state.selection, schema = state.schema, tr = state.tr;
             var _a = getRangeInfo(selection), startFromOffset = _a.startFromOffset, endToOffset = _a.endToOffset;
@@ -6052,10 +6060,12 @@ var CodeBlock = /** @class */ (function (_super) {
     };
     CodeBlock.prototype.keymaps = function () {
         var codeBlockCommand = this.commands()();
+        var tabCommand = this.commands('Tab')();
         return {
             'Shift-Mod-p': codeBlockCommand,
             'Shift-Mod-P': codeBlockCommand,
             Enter: this.keepIndentation(),
+            Tab: tabCommand,
         };
     };
     return CodeBlock;

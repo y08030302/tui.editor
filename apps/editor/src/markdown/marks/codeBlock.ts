@@ -25,7 +25,17 @@ export class CodeBlock extends Mark {
     };
   }
 
-  commands(): EditorCommand {
+  commands(cmdType?: string): EditorCommand {
+    if (cmdType === 'Tab') {
+      return (state, dispatch) => {
+        const { $from, $to } = state.selection;
+        const tr = state.tr.insertText('\t', $from.pos, $to.pos);
+
+        dispatch!(tr);
+        return true;
+      };
+    }
+
     return () => (state, dispatch) => {
       const { selection, schema, tr } = state;
       const { startFromOffset, endToOffset } = getRangeInfo(selection);
@@ -75,11 +85,13 @@ export class CodeBlock extends Mark {
 
   keymaps() {
     const codeBlockCommand = this.commands()();
+    const tabCommand = this.commands('Tab')();
 
     return {
       'Shift-Mod-p': codeBlockCommand,
       'Shift-Mod-P': codeBlockCommand,
       Enter: this.keepIndentation(),
+      Tab: tabCommand,
     };
   }
 }
